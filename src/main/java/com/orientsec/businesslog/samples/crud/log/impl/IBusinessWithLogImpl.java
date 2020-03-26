@@ -8,42 +8,24 @@ import com.orientsec.businesslog.samples.crud.log.entity.BusinessLogResult;
 import com.orientsec.businesslog.samples.crud.log.entity.BusinessOperation;
 import com.orientsec.businesslog.samples.crud.log.entity.LogType;
 import com.orientsec.businesslog.samples.crud.log.entity.TableOperation;
+import lombok.Data;
 import org.springframework.stereotype.Repository;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 @Repository
+@Data
 public class IBusinessWithLogImpl<T extends BaseMapper> implements IBusinessWithLog {
 
     // 继承了BaseMapper的Mapper
     private T tMapper;
-    private long id;
-
-    public IBusinessWithLogImpl(T tMapper, long id) {
-        this.tMapper = tMapper;
-        this.id = id;
-    }
-
-    public T gettMapper() {
-        return tMapper;
-    }
-
-    public void settMapper(T tMapper) {
-        this.tMapper = tMapper;
-    }
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
+    private Serializable id;
 
     @Override
     public Object selectById() {
-       return tMapper.selectById(this.id);
+        return tMapper.selectById(this.id);
     }
 
     @Override
@@ -63,8 +45,8 @@ public class IBusinessWithLogImpl<T extends BaseMapper> implements IBusinessWith
 
     // 封装数据表变化对象
     @Override
-    public List<String> parseTableObject(List<String> tableNames, List<?> sourceData, List<?> targetData){
-        List<String> tableObject = new ArrayList();
+    public List<String> parseTableObject(List<String> tableNames, List<Object> sourceData, List<Object> targetData){
+        List<String> tableObject = new ArrayList<String>();
         if(tableNames.size() == sourceData.size() && sourceData.size() == targetData.size()){
             for(int index = 0; index < tableNames.size(); index++){
                 TableOperation tableOperation = new TableOperation(tableNames.get(index),
@@ -81,7 +63,7 @@ public class IBusinessWithLogImpl<T extends BaseMapper> implements IBusinessWith
     public BusinessLogResult insertLog(String operationType, List<String> tableObject,
                                                 String businessModle, String businessType, String operationDesc){
         BusinessLogResult businessLogResult = new BusinessLogResult();
-        BusinessOperation businessOperation = new BusinessOperation(operationType,businessModle,businessType,operationDesc,tableObject);
+        BusinessOperation businessOperation = new BusinessOperation(operationType, businessModle, businessType, operationDesc, tableObject);
         // 没有jar,先模拟
         // BusinessLogResult businessLogResult = JSONObject.parseObject(BusinessLog.insertLog(operationDesc, tableObject, businessModle, businessType, operationDesc));
 

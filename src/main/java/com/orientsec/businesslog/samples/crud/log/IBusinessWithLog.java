@@ -16,7 +16,7 @@ public interface IBusinessWithLog {
     int deleteById();
 
     // 封装数据表变化对象
-    List<String> parseTableObject(List<String> tableNames, List<?> sourceData, List<?> targetData);
+    List<String> parseTableObject(List<String> tableNames, List<Object> sourceData, List<Object> targetData);
 
     // 插入数据库操作
     BusinessLogResult insertLog(String operationType, List<String> tableObject, String businessModle, String businessType, String operationDesc);
