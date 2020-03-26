@@ -8,38 +8,42 @@ import com.orientsec.businesslog.samples.crud.log.entity.BusinessLogResult;
 import com.orientsec.businesslog.samples.crud.log.entity.BusinessOperation;
 import com.orientsec.businesslog.samples.crud.log.entity.LogType;
 import com.orientsec.businesslog.samples.crud.log.entity.TableOperation;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Repository;
 
+import javax.annotation.Resource;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 @Repository
 @Data
-public class IBusinessWithLogImpl<T extends BaseMapper> implements IBusinessWithLog {
+@AllArgsConstructor
+public class IBusinessWithLogImpl<T> implements IBusinessWithLog<T> {
 
     // 继承了BaseMapper的Mapper
-    private T tMapper;
-    private Serializable id;
+    private BaseMapper<T> tMapper;
 
     @Override
-    public Object selectById() {
-        return tMapper.selectById(this.id);
+    public T selectById(long id) {
+        return tMapper.selectById(id);
     }
 
     @Override
-    public int deleteById() {
-        return tMapper.deleteById(this.id);
+    public int deleteById(long id) {
+        return tMapper.deleteById(id);
     }
 
     @Override
-    public int updateById(Object entity) {
+    public int updateById(T entity) {
         return tMapper.updateById(entity);
     }
 
     @Override
-    public int insert(Object entity) {
+    public int insert(T entity) {
         return tMapper.insert(entity);
     }
 
@@ -73,8 +77,8 @@ public class IBusinessWithLogImpl<T extends BaseMapper> implements IBusinessWith
     }
 
     @Override
-    public BusinessLogResult executeBusinessWithLog(LogType logType, String operationType, String operationDesc, String businessModle, String businessType,
-                                                String tableName, Object... entity){
+    public BusinessLogResult executeBusinessWithLog(long id, LogType logType, String operationType, String operationDesc, String businessModel, String businessType,
+                                                    String tableName, T... entity){
         BusinessLogResult businessLogResult = new BusinessLogResult();
         List<String> tableNames = new ArrayList<>();
         List<Object> sourceData = new ArrayList<>();
@@ -89,18 +93,18 @@ public class IBusinessWithLogImpl<T extends BaseMapper> implements IBusinessWith
                 targetData.add(entity[0]);
                 break;
             case DELETE:
-                sourceData.add(selectById());
-                deleteById();
+                sourceData.add(selectById(id));
+                deleteById(1L);
                 targetData.add(emptyJSON);
                 break;
             case UPDATE:
-                sourceData.add(selectById());
+                sourceData.add(selectById(id));
                 updateById(entity[0]);
                 targetData.add(entity[0]);
                 break;
         }
         List<String> tableObject = parseTableObject(tableNames,sourceData,targetData);
-        businessLogResult = insertLog(operationType, tableObject, businessModle, businessType, operationDesc);
+        businessLogResult = insertLog(operationType, tableObject, businessModel, businessType, operationDesc);
         return businessLogResult;
     }
 }

@@ -5,15 +5,15 @@ import com.orientsec.businesslog.samples.crud.log.entity.LogType;
 
 import java.util.List;
 
-public interface IBusinessWithLog {
+public interface IBusinessWithLog<T> {
     //查询
-    Object selectById();
+    T selectById(long id);
     // 更新
-    int updateById(Object entity);
+    int updateById(T entity);
     // 保存
-    int insert(Object entity);
+    int insert(T entity);
     // 删除
-    int deleteById();
+    int deleteById(long id);
 
     // 封装数据表变化对象
     List<String> parseTableObject(List<String> tableNames, List<Object> sourceData, List<Object> targetData);
@@ -22,6 +22,6 @@ public interface IBusinessWithLog {
     BusinessLogResult insertLog(String operationType, List<String> tableObject, String businessModle, String businessType, String operationDesc);
 
     // 执行带操作日志插入的动作
-    BusinessLogResult executeBusinessWithLog(LogType logType, String operationType, String operationDesc, String businessModle, String businessType,
-                                             String tableName, Object... entity);
+    BusinessLogResult executeBusinessWithLog(long id, LogType logType, String operationType, String operationDesc, String businessModel, String businessType,
+                                             String tableName, T... entity);
 }
