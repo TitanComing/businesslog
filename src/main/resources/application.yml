@@ -1,0 +1,15 @@
+# DataSource Config
+spring:
+  datasource:
+    driver-class-name: com.p6spy.engine.spy.P6SpyDriver
+    schema: classpath:db/schema.sql
+    data: classpath:db/data.sql
+    url: jdbc:p6spy:h2:mem:test;DB_CLOSE_DELAY=-1;DATABASE_TO_UPPER=false;
+    username: root
+    password: test
+
+# Logger Config
+logging:
+  level:
+    com.baomidou.mybatisplus.samples: debug
+# MyBatis-Plus 配置该演示无
