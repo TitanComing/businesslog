@@ -10,6 +10,7 @@ import com.orientsec.businesslog.samples.crud.log.entity.LogType;
 import com.orientsec.businesslog.samples.crud.log.entity.TableOperation;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Repository;
@@ -49,13 +50,30 @@ public class IBusinessWithLogImpl<T> implements IBusinessWithLog<T> {
 
     // 封装数据表变化对象
     @Override
-    public List<String> parseTableObject(List<String> tableNames, List<Object> sourceData, List<Object> targetData){
+    public List<String> parseTableObject(List<String> tableNames, List<T> sourceData, List<T> targetData){
         List<String> tableObject = new ArrayList<String>();
         if(tableNames.size() == sourceData.size() && sourceData.size() == targetData.size()){
             for(int index = 0; index < tableNames.size(); index++){
                 TableOperation tableOperation = new TableOperation(tableNames.get(index),
                         JSON.toJSONString(sourceData.get(index)),
                         JSON.toJSONString(targetData.get(index)));
+                tableObject.add(JSON.toJSONString(tableOperation));
+            }
+        }
+        if(sourceData.size() == 0){
+            for(int index = 0; index < tableNames.size(); index++){
+                TableOperation tableOperation = new TableOperation(tableNames.get(index),
+                        "{}",
+                        JSON.toJSONString(targetData.get(index)));
+                tableObject.add(JSON.toJSONString(tableOperation));
+            }
+        }
+        if(targetData.size() == 0){
+            for(int index = 0; index < tableNames.size(); index++){
+                TableOperation tableOperation = new TableOperation(tableNames.get(index),
+                        JSON.toJSONString(sourceData.get(index)),
+                        "{}"
+                );
                 tableObject.add(JSON.toJSONString(tableOperation));
             }
         }
@@ -76,33 +94,71 @@ public class IBusinessWithLogImpl<T> implements IBusinessWithLog<T> {
         return businessLogResult;
     }
 
+    // 更新数据操作
     @Override
-    public BusinessLogResult executeBusinessWithLog(long id, LogType logType, String operationType, String operationDesc, String businessModel, String businessType,
-                                                    String tableName, T... entity){
+    public BusinessLogResult executeBusinessWithLog(LogType logType,String tableName,
+                                                    String operationType, String operationDesc, String businessModel, String businessType,
+                                                    long id, T entity){
         BusinessLogResult businessLogResult = new BusinessLogResult();
         List<String> tableNames = new ArrayList<>();
-        List<Object> sourceData = new ArrayList<>();
-        List<Object> targetData = new ArrayList<>();
-        String emptyJSON = "{}";
+        List<T> sourceData = new ArrayList<>();
+        List<T> targetData = new ArrayList<>();
+
+        if(logType == LogType.UPDATE){
+            sourceData.add(selectById(id));
+            updateById(entity);
+            targetData.add(entity);
+        }else {
+            throw new IllegalArgumentException("更新数据的LogType必须是：LogType.UPDATE");
+        }
         tableNames.add(tableName);
 
-        switch (logType){
-            case CREATE:
-                insert(entity[0]);
-                sourceData.add(emptyJSON);
-                targetData.add(entity[0]);
-                break;
-            case DELETE:
-                sourceData.add(selectById(id));
-                deleteById(1L);
-                targetData.add(emptyJSON);
-                break;
-            case UPDATE:
-                sourceData.add(selectById(id));
-                updateById(entity[0]);
-                targetData.add(entity[0]);
-                break;
+        List<String> tableObject = parseTableObject(tableNames,sourceData,targetData);
+        businessLogResult = insertLog(operationType, tableObject, businessModel, businessType, operationDesc);
+        return businessLogResult;
+    }
+
+    // 删除数据操作
+    @Override
+    public BusinessLogResult executeBusinessWithLog(LogType logType,String tableName,
+                                                    String operationType, String operationDesc, String businessModel, String businessType,
+                                                    long id){
+        BusinessLogResult businessLogResult = new BusinessLogResult();
+        List<String> tableNames = new ArrayList<>();
+        List<T> sourceData = new ArrayList<>();
+        List<T> targetData = new ArrayList<>();
+
+        if(logType == LogType.DELETE){
+            sourceData.add(selectById(id));
+            deleteById(id);
+        }else {
+            throw new IllegalArgumentException("删除数据的LogType必须是：LogType.DELETE");
         }
+        tableNames.add(tableName);
+
+        List<String> tableObject = parseTableObject(tableNames,sourceData,targetData);
+        businessLogResult = insertLog(operationType, tableObject, businessModel, businessType, operationDesc);
+        return businessLogResult;
+    }
+
+    // 创建数据操作
+    @Override
+    public BusinessLogResult executeBusinessWithLog(LogType logType,String tableName,
+                                                    String operationType, String operationDesc, String businessModel, String businessType,
+                                                    T entity){
+        BusinessLogResult businessLogResult = new BusinessLogResult();
+        List<String> tableNames = new ArrayList<>();
+        List<T> sourceData = new ArrayList<>();
+        List<T> targetData = new ArrayList<>();
+
+        if(logType == LogType.CREATE){
+            insert(entity);
+            targetData.add(entity);
+        }else {
+            throw new IllegalArgumentException("创建数据的LogType必须是：LogType.CREATE");
+        }
+        tableNames.add(tableName);
+
         List<String> tableObject = parseTableObject(tableNames,sourceData,targetData);
         businessLogResult = insertLog(operationType, tableObject, businessModel, businessType, operationDesc);
         return businessLogResult;

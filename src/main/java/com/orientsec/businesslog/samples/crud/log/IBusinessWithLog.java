@@ -16,12 +16,18 @@ public interface IBusinessWithLog<T> {
     int deleteById(long id);
 
     // 封装数据表变化对象
-    List<String> parseTableObject(List<String> tableNames, List<Object> sourceData, List<Object> targetData);
+    List<String> parseTableObject(List<String> tableNames, List<T> sourceData, List<T> targetData);
 
     // 插入数据库操作
     BusinessLogResult insertLog(String operationType, List<String> tableObject, String businessModle, String businessType, String operationDesc);
 
-    // 执行带操作日志插入的动作
-    BusinessLogResult executeBusinessWithLog(long id, LogType logType, String operationType, String operationDesc, String businessModel, String businessType,
-                                             String tableName, T... entity);
+    // 执行带操作日志的动作: update
+    BusinessLogResult executeBusinessWithLog(LogType logType, String tableName, String operationType, String operationDesc, String businessModel, String businessType,
+                                             long id, T entity);
+    // 执行带操作日志的动作: delete
+    BusinessLogResult executeBusinessWithLog(LogType logType, String tableName, String operationType, String operationDesc, String businessModel, String businessType,
+                                             long id);
+    // 执行带操作日志的动作: create
+    BusinessLogResult executeBusinessWithLog(LogType logType, String tableName, String operationType, String operationDesc, String businessModel, String businessType,
+                                             T entity);
 }

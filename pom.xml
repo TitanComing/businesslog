@@ -48,21 +48,6 @@
       <version>${mybatisplus.version}</version>
     </dependency>
     <dependency>
-      <groupId>com.baomidou</groupId>
-      <artifactId>mybatis-plus</artifactId>
-      <version>${mybatisplus.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.baomidou</groupId>
-      <artifactId>mybatis-plus-dts</artifactId>
-      <version>${mybatisplus.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.baomidou</groupId>
-      <artifactId>mybatis-plus-generator</artifactId>
-      <version>${mybatisplus.version}</version>
-    </dependency>
-    <dependency>
       <groupId>p6spy</groupId>
       <artifactId>p6spy</artifactId>
       <version>3.8.5</version>
